@@ -1,0 +1,17 @@
+.card {
+  border: 1px solid black;
+  width: 111px;
+  height: 162px;
+  background-color: white;
+}
+
+.table {
+  background-color: #00FF00;
+}
+
+.center {
+    margin: auto;
+    width: 40%;
+    border: 3px solid black;
+    padding: 10px;
+}

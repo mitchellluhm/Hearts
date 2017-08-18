@@ -22,11 +22,28 @@ var getValByTitle = function(t) {
   return intValue;
 }
 
+var getSuitByTitle = function(t) {
+  var id = t.substring(t.length-2, t.length-1);
+  switch (id) {
+    case "t":
+      return "hearts";
+    case "e":
+      return "spades";
+    case "b":
+      return "clubs";
+    case "d":
+      return "diamonds";
+    default:
+      return "ERROR_SUIT_UNKNOWN/INVALID_CARD_TITLE";
+  }
+}
+
 function card(title) {
     this.title = title;
     this.html =
-      $("<img src=\"/home/mitchell/Projects/hearts_web/card_pngs/" + title + ".png\">")
+      $("<img src=\"/home/mitchell/Projects/hearts_web/card_pngs/" + title + ".png\"" + " class=\"card\"" + ">")
     this.value = getValByTitle(title);
+    this.suit = getSuitByTitle(title);
     this.x = -1;
     this.y = -1;
 }
@@ -47,21 +64,56 @@ var initCards = function() {
 }
 
 initCards();
+//document.write(Math.floor(Math.random() * 52));
+var shuffleCards = function() {
+  for (var i = 0; i < 300; i++) {
+    var randomIndex1 = Math.floor(Math.random() * 52);
+    var randomIndex2 = Math.floor(Math.random() * 52);
+    if (randomIndex1 != randomIndex2) {
+      var tempCard = cards[randomIndex1];
+      cards[randomIndex1] = cards[randomIndex2];
+      cards[randomIndex2] = tempCard;
+    }
+  }
+}
 
-//var a = new card("2_of_hearts");
-//document.write(a.value);
-//var b = new card("queen_of_hearts");
-//document.write(b.value);
+shuffleCards();
+//document.write(cards[4].suit);
+
+var hands = [[], [], [], []];
+
+var dealCards = function() {
+  var card_index = 0;
+  for (var hand = 0; hand < 4; hand++) {
+    for (var i = 0; i < 13; i++) {
+      hands[hand][i] = cards[card_index];
+      //document.write(hands[hand][i].title);
+      card_index = card_index + 1;
+    }
+
+  }
+}
+
+dealCards();
+
+var showCards = function() {
+  for (var id = 0; id < 13; id++) {
+    $("#" + id).append(hands[0][id].html);
+  }
+}
+
+showCards();
+
 
 $(document).ready(function() {
-  var x = $("<img src=\"/home/mitchell/Projects/hearts_web/card_pngs/2_of_clubs.png\" style=\"width:50px;height:90px;\">");
+  /*var x = $("<img src=\"/home/mitchell/Projects/hearts_web/card_pngs/2_of_clubs.png\" style=\"width:50px;height:90px;\">");
   $('#1').append(x);
   $(x).click(function(){
     $(this).remove();
   });
 
   var a = new card("2_of_hearts");
-  $('#2').append(a.html);
+  $('#2').append(a.html);*/
 
 
 
