@@ -2,7 +2,7 @@ $(document).ready(function() {
 
 var rounds_left = 13;
 
-var getValByTitle = function(t) {
+function getValByTitle(t) {
   var faceValue = t.substring(0, t.indexOf("_")) // string
   var intValue;
   // 0 --> 2 | 12 -> "ace"
@@ -26,7 +26,7 @@ var getValByTitle = function(t) {
   return intValue;
 }
 
-var getSuitByTitle = function(t) {
+function getSuitByTitle(t) {
   var id = t.substring(t.length-2, t.length-1);
   switch (id) {
     case "t":
@@ -42,9 +42,8 @@ var getSuitByTitle = function(t) {
   }
 }
 
-var getTitleByHTML = function(card_html) {
+function getTitleByHTML(card_html) {
   return card_html.substring(card_html.indexOf("id=") + 4, card_html.length - 2);
-  //return card_html;
 }
 
 function card(title) {
@@ -62,7 +61,7 @@ function card(title) {
 
 var cards = [];
 
-var initCards = function() {
+function initCards() {
   faceValues = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king", "ace"]; // size 13
   suits = ["clubs", "hearts", "spades", "diamonds"];
 
@@ -75,8 +74,8 @@ var initCards = function() {
 }
 
 initCards();
-//document.write(Math.floor(Math.random() * 52));
-var shuffleCards = function() {
+
+function shuffleCards() {
   for (var i = 0; i < 300; i++) {
     var randomIndex1 = Math.floor(Math.random() * 52);
     var randomIndex2 = Math.floor(Math.random() * 52);
@@ -89,22 +88,19 @@ var shuffleCards = function() {
 }
 
 shuffleCards();
-//document.write(cards[4].suit);
 
 var hands = [[], [], [], []];
 
 var player_with_2clubs = 0;
 
-var dealCards = function() {
+function dealCards() {
   var card_index = 0;
   for (var hand = 0; hand < 4; hand++) {
     for (var i = 0; i < 13; i++) {
       hands[hand][i] = cards[card_index];
-      // find 2 of club holder to determine who starts
       if (cards[card_index].title == "2_of_clubs") {
         player_with_2clubs = hand;
       }
-      //document.write(hands[hand][i].title);
       card_index = card_index + 1;
     }
 
@@ -113,17 +109,13 @@ var dealCards = function() {
 
 dealCards();
 
-var showCards = function() {
+function showCards() {
   for (var id = 0; id < 13; id++) {
     $("#" + id).append(hands[0][id].html);
-    // $("#" + id).click(function() {
-    //    $(this).remove();
-    //    $("#m0").append($(this));
-    //  });
   }
 }
 
-var getCardIndexByTitle = function(player, t) {
+function getCardIndexByTitle(player, t) {
   for (var i = 0; i < 13; i++) {
     if (hands[player][i].title == t) {
       return i;
@@ -132,7 +124,7 @@ var getCardIndexByTitle = function(player, t) {
   return -1;
 }
 
-var findCardByTitle = function(t) {
+function findCardByTitle(t) {
   for (var i = 0; i < 13; i++) {
     if (hands[0][i].title == t) {
 
@@ -154,7 +146,7 @@ var next_turn;
 var heart_placed = false; // not allowed to lay hearts until true
 var turn_suit;
 
-var hasSuit = function(player, suit) {
+function hasSuit(player, suit) {
   for (var i = 0; i < 13; i++) {
     if (hands[player][i].placed == false && hands[player][i].suit == suit) {
       return true; // has suit must placed card of this type
@@ -163,40 +155,42 @@ var hasSuit = function(player, suit) {
   return false; // doesn't have suit so can place anything
 }
 
-var waitContinue = function() {
+function waitContinue() {
   $("#continue_button").click(function() {
+    $(this).off("click");
     // $("#m0").empty();
     // $("#m1").empty();
     // $("#m2").empty();
     // $("#m3").empty();
-    if (p_first_turn == 0) {
+
+    if (p_first_turn === 0) {
+      console.log("begin next round with the user");
       start_move(p_first_turn, true);
     }
     else {
+      console.log("begin next round with cpu");
       cpu_move(p_first_turn, true);
     }
-  })
+  });
 }
 
-var endRound = function() {
+function endRound() {
   // find who won the rounds
-  currentRound++;
+  console.log("------------------");
+  currentRound += 1;
   var max_card = placed_cards[p_first_turn];
   var max_card_player = p_first_turn;
   //var active_suit = placed_cards[p_first_turn].suit;
   //var max_of_suit = placed_card[p_first_turn].value;
   for (var i = 0; i < 4; i++) {
-    if (max_card.suit == placed_cards[i].suit && max_card.value < placed_cards[i].value) {
-      //alert("found card!!" + placed_cards[i].title);
+    if (max_card.suit === placed_cards[i].suit && max_card.value < placed_cards[i].value) {
       max_card = placed_cards[i];
       max_card_player = i;
     }
   }
-  //alert("max card player is " + max_card_player);
-
   p_first_turn = max_card_player;
   p_turn = max_card_player;
-  cpuPick++;
+  //cpuPick++;
 
   waitContinue();
 }
@@ -204,26 +198,26 @@ var endRound = function() {
 // returns an array of card indices of player's hand that could be placed
 // turn_suit and hearts_placed global variables will be of use here
 // also currentRound
-var getPlayableCardsByHand = function(player, first_move) {
+function getPlayableCardsByHand (player, first_move) {
   var playable_card_indices = [];
   // check if can only play 2 of clubs
-  if (first_move && currentRound == 0) {
+  if (first_move && currentRound === 0) {
     playable_card_indices.push(getCardIndexByTitle(player, "2_of_clubs"));
     return playable_card_indices;
   }
   // check if can play anything but a heart
-  else if (first_move && hearts_placed == false) {
+  else if (first_move && heart_placed === false) {
     for (var i = 0; i < 13; i++) {
-      if (hands[player][i].placed == false && hands[player][i].suit != "hearts") {
+      if (hands[player][i].placed === false && hands[player][i].suit !== "hearts") {
         playable_card_indices.push(i);
       }
     }
     return playable_card_indices;
   }
   // check if can play anything
-  else if (first_move && hearts_placed) {
+  else if (first_move && heart_placed) {
     for (var i = 0; i < 13; i++) {
-      if (hands[player][i].placed == false) {
+      if (hands[player][i].placed === false) {
         playable_card_indices.push(i);
       }
     }
@@ -232,34 +226,35 @@ var getPlayableCardsByHand = function(player, first_move) {
   // check if has to play what turn_suit is
   else if (hasSuit(player, turn_suit)) {
     for (var i = 0; i < 13; i++) {
-      if(hands[player][i].placed == false && hands[player][i].suit == turn_suit) {
+      if(hands[player][i].placed === false && hands[player][i].suit === turn_suit) {
         playable_card_indices.push(i);
       }
     }
     return playable_card_indices;
   }
   // check if doesn't have turn_suit => can play anything
-  else if (hasSuit(player, turn_suit) == false) {
+  else if (hasSuit(player, turn_suit) === false) {
     for (var i = 0; i < 13; i++) {
-      if (hands[player][i].placed == false) {
+      if (hands[player][i].placed === false) {
         playable_card_indices.push(i);
       }
     }
     return playable_card_indices;
   }
-
+  return playable_card_indices;
 }
 
-var cpu_move = function(player, first_move) {
+function cpu_move(player, first_move) {
   // if (first_move == false && hasSuit(player, turn_suit)) {
   //
   // }
-  //alert(getPlayableCardsByHand(player, first_move));
-  cpuPick = getPlayableCardsByHand(player,first_move)[0];
+  console.log("player " + player + " fm " + first_move + " cpu" + "p_first_turn " + p_first_turn);
+  var picks = getPlayableCardsByHand(player, first_move);
+  cpuPick = picks[0];
   $("#m" + player).append(hands[player][cpuPick].html);
   hands[player][cpuPick].placed = true;
   if (hands[player][cpuPick].suit == "hearts") {
-    hearts_placed = true;
+    heart_placed = true;
   }
   placed_cards[player] = hands[player][cpuPick];
   p_turn = player;
@@ -273,67 +268,60 @@ var cpu_move = function(player, first_move) {
   else {
     next_turn = p_turn + 1;
   }
-  if (next_turn != p_first_turn) {
-    if (p_turn + 1 < 4) {
-      cpu_move(p_turn + 1, false);
+  if (next_turn !== p_first_turn) {
+    if (next_turn !== 0) {
+      cpu_move(next_turn, false);
     }
     else {
       start_move(0, false);
     }
   }
   else {
-    //alert("end of round");
     endRound();
   }
 }
 
-var start_move = function(player, first_move) {
-  if (currentRound == 0) {
-    for (var i = 0; i < rounds_left; i++) {
+function start_move(player, first_move) {
+  console.log("player " + player + " fm " + first_move + " user p_first_turn " + p_first_turn);
+  for (var i = 0; i < rounds_left; i++) {
+    if (hands[player][i].placed == false) {
       $("#" + i).click(function() {
-        //start_move(0, $(this));
+        $(this).off("click");
         $(this).remove();
         $("#m0").append($(this));
-        findCardByTitle(getTitleByHTML($(this).html())).placed = true;;
+        // get card index in hands . .
+        selected_card = hands[player][getCardIndexByTitle(player, getTitleByHTML($(this).html()))];
+        selected_card.placed = true;
         if (first_move) {
-          turn_suit = findCardByTitle(getTitleByHTML($(this).html())).suit;
+          turn_suit = selected_card.suit;
         }
-        if (findCardByTitle(getTitleByHTML($(this).html())).suit = "hearts") {
-          hearts_placed = true;
+        if (selected_card.suit === "hearts") {
+          heart_placed = true;
         }
-        placed_cards[player] = findCardByTitle(getTitleByHTML($(this).html()))
+        placed_cards[player] = selected_card;
         p_turn = player;
-        next_turn = 1;
-        if (next_turn != p_first_turn) {
-          cpu_move(p_turn + 1, false);
+        next_turn = player + 1;
+        if (1 !== p_first_turn) {
+          cpu_move(1, false);
         }
         else {
-          //alert("end or round");
           endRound();
         }
-
       });
     }
   }
-  // $card.remove();
-  // $("#m0").append($card);
-  // //alert(getTitleByHTML($card.html()));
-  // cpu_move(p_turn + 1);
-
-  // delay for user move
 
 }
 
 
-//start_move(0, 1);
 
 //use events instead of loops to play the game
-var play = function() {
+function play() {
   // check to see if user is starting
 
   p_turn = player_with_2clubs;
   p_first_turn = player_with_2clubs;
-  if (p_turn != 0) {
+  if (p_turn !== 0) {
     cpu_move(p_turn, true);
   }
   else {
